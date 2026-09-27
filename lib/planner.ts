@@ -1,0 +1,14 @@
+import { z } from 'zod';
+export const IngredientSchema = z.object({ name: z.string(), quantity: z.string() });
+export const MealSchema = z.object({ type: z.string(), name: z.string(), ingredients: z.array(IngredientSchema), calories: z.number(), protein: z.number(), carbs: z.number(), fat: z.number(), preparationTime: z.number(), instructions: z.string() });
+export const PlanSchema = z.object({ day: z.string(), meals: z.array(MealSchema), dailyTotals: z.object({ calories: z.number(), protein: z.number(), carbs: z.number(), fat: z.number() }) });
+export type Meal = z.infer<typeof MealSchema>;
+export const sampleMeals: Meal[] = [
+ { type:'Breakfast',name:'Honey almond overnight oats',ingredients:[{name:'Rolled oats',quantity:'60 g'},{name:'Greek yogurt',quantity:'120 g'},{name:'Blueberries',quantity:'½ cup'},{name:'Honey',quantity:'1 tsp'}],calories:390,protein:22,carbs:58,fat:9,preparationTime:10,instructions:'Stir oats and yogurt together. Top with blueberries and honey, then chill overnight.' },
+ { type:'Morning snack',name:'Apple & almond butter',ingredients:[{name:'Apple',quantity:'1 medium'},{name:'Almond butter',quantity:'1 tbsp'}],calories:190,protein:4,carbs:28,fat:9,preparationTime:2,instructions:'Slice the apple and serve with almond butter.' },
+ { type:'Lunch',name:'Green goddess grain bowl',ingredients:[{name:'Quinoa',quantity:'¾ cup cooked'},{name:'Chickpeas',quantity:'½ cup'},{name:'Avocado',quantity:'½'},{name:'Cucumber',quantity:'½ cup'}],calories:540,protein:21,carbs:70,fat:20,preparationTime:20,instructions:'Build a bowl with warm quinoa, chickpeas, cucumber and avocado. Finish with lemon dressing.' },
+ { type:'Afternoon snack',name:'Cottage cheese & peaches',ingredients:[{name:'Cottage cheese',quantity:'½ cup'},{name:'Peach',quantity:'1 small'}],calories:170,protein:15,carbs:22,fat:3,preparationTime:3,instructions:'Spoon cottage cheese into a bowl and top with sliced peach.' },
+ { type:'Dinner',name:'Lemon herb salmon plate',ingredients:[{name:'Salmon fillet',quantity:'140 g'},{name:'Baby potatoes',quantity:'180 g'},{name:'Asparagus',quantity:'1 cup'},{name:'Olive oil',quantity:'1 tsp'}],calories:610,protein:42,carbs:52,fat:24,preparationTime:30,instructions:'Roast potatoes until tender. Season salmon and asparagus with lemon and herbs, then bake for 12–15 minutes.' }
+];
+export function totalMeals(meals: Meal[]) { return meals.reduce((a,m)=>({calories:a.calories+m.calories,protein:a.protein+m.protein,carbs:a.carbs+m.carbs,fat:a.fat+m.fat}),{calories:0,protein:0,carbs:0,fat:0}); }
+export function calorieEstimate(age:number,gender:string,height:number,weight:number,activity:number,goal:string) { const bmr=gender==='Female'?10*weight+6.25*height-5*age-161:10*weight+6.25*height-5*age+5; const adjustment=goal==='Lose weight'?-350:goal==='Gain weight'||goal==='Build muscle'?250:0; return Math.round(bmr*activity+adjustment); }

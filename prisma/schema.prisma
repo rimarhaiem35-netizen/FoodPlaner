@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String       @id @default(cuid())
+  email     String       @unique
+  name      String
+  profile   UserProfile?
+  plans     MealPlan[]
+  groceries GroceryList[]
+  saved     SavedMeal[]
+  createdAt DateTime     @default(now())
+}
+
+model UserProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  age         Int
+  gender      String
+  heightCm    Float
+  weightKg    Float
+  goal        String
+  activity    String
+  diet        String
+  favorites   String  @default("")
+  dislikes    String  @default("")
+  allergies   String  @default("[]")
+  mealCount   Int     @default(5)
+  budget      String  @default("Medium")
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MealPlan {
+  id          String   @id @default(cuid())
+  userId      String
+  day         DateTime
+  totalEnergy Int      @default(0)
+  meals       Meal[]
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, day])
+}
+
+model Meal {
+  id              String   @id @default(cuid())
+  planId          String
+  type            String
+  name            String
+  ingredients     String   @default("[]")
+  calories        Int
+  protein         Float
+  carbs           Float
+  fat             Float
+  preparationTime Int
+  instructions    String
+  completed       Boolean  @default(false)
+  plan            MealPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  savedBy         SavedMeal[]
+}
+
+model GroceryList {
+  id        String        @id @default(cuid())
+  userId    String
+  weekOf    DateTime
+  items     GroceryItem[]
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model GroceryItem {
+  id          String      @id @default(cuid())
+  listId      String
+  name        String
+  quantity    String
+  category    String
+  estimatedCost Float?
+  purchased   Boolean     @default(false)
+  list        GroceryList @relation(fields: [listId], references: [id], onDelete: Cascade)
+}
+
+model SavedMeal {
+  id        String   @id @default(cuid())
+  userId    String
+  mealId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meal      Meal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  @@unique([userId, mealId])
+}
